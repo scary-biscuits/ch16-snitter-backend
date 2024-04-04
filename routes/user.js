@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const sha256 = require("sha256");
-const {salt} = require("../secrets")
+const {salt} = require("../secrets");
+const {findUserByCreds, findUserIndexOfById} = require("../utils");
 
 //add a new user
 router.post("/", (req, res) => {
@@ -15,9 +16,8 @@ router.post("/", (req, res) => {
 
     password = sha256(password + salt);
 
-    const user = users.find(user => {
-        return user.username === username && user.password === password && user.email === email; 
-    })
+    const user = findUserByCreds(users, username, password, email);
+
     if (user) {
         res.send({status: 0, message: "An account with these credentials already exists"})
         return;
@@ -44,9 +44,7 @@ if (!id || Number.isNaN(id)) {
 return;
 }
 
-const indexOf = users.findIndex((user) => {
-    return user.id === id 
-});
+const indexOf = findUserIndexOfById(users, id);
 
 if (indexOf === -1) {
     res.send({status: 0, message: "User not found"});
@@ -67,16 +65,15 @@ const {users} = req;
     res.send({status: 0, message: "No data sent"});
  }
 
- id= Number(id);
+ id = Number(id);
 
  if (!id || Number.isNaN(id)) {
      res.send({status: 0, message: "Missing or invalid ID sent"})
  return;
  }
  
- const indexOf = users.findIndex((user) => {
-     return user.id === id 
- });
+ const indexOf = findUserIndexOfById(users, id);
+ console.log(indexOf)
  
  if (indexOf === -1) {
      res.send({status: 0, message: "User not found"});
@@ -96,7 +93,28 @@ if(name) {
 
  res.send({status: 1, message: "User updated"})
 
+});
+
+
+//append random data - needs work
+router.patch("/append/:id", (req, res) => {
+    let {id} = req.params;
+    const {users} = req;
+
+    id = Number(id);
+
+if (!id || Number.isNaN(id)) {
+    res.send({status: 0, message: "Missing or invalid ID sent"})
+return;
+};
+
+const indexOf = findUserIndexOfById(users, id);
+
+users[indexOf].newData = req.body;
+res.send({status: 1, message: "New data added"})
 })
+
+
 
 //delete a user
 router.delete("/:id", (req, res) => {
@@ -110,9 +128,7 @@ if (!id || Number.isNaN(id)) {
 return;
 }
 
-const indexOf = users.findIndex((user) => {
-    return user.id === id 
-});
+const indexOf = findUserIndexOfById(users,id);
 
 if (indexOf === -1) {
     res.send({status: 0, message: "User not found"})
