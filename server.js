@@ -19,7 +19,8 @@ next();
 })
 
 //routes
-app.use("/user", require("./routes/user"))
+app.use("/user", require("./routes/user"));
+app.use("/authenticate", require("./routes/auth"));
 
 app.get("/sneets", (req,res) => {
     res.send("hello")

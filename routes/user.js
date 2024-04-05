@@ -3,6 +3,7 @@ const router = express.Router();
 const sha256 = require("sha256");
 const {salt} = require("../secrets");
 const {findUserByCreds, findUserIndexOfById} = require("../utils");
+const { checkToken } = require("../middleware");
 
 //add a new user
 router.post("/", (req, res) => {
@@ -23,7 +24,7 @@ router.post("/", (req, res) => {
         return;
     }
     lastAssignedId.value++;
-    users.push({name, username, email, password, id: lastAssignedId.value});
+    users.push({id: lastAssignedId.value, name, username, email, password });
     res.send({status: 1, id: lastAssignedId.value})
 })
 
@@ -33,25 +34,9 @@ router.get("/", (req,res) => {
 })
 
 //get one user
-router.get("/:id", (req, res) => {
-    let {id} = req.params;
-    const {users} = req;
+router.get("/:id", checkToken, (req, res) => {
 
-    id= Number(id);
-
-if (!id || Number.isNaN(id)) {
-    res.send({status: 0, message: "Missing or invalid ID sent"})
-return;
-}
-
-const indexOf = findUserIndexOfById(users, id);
-
-if (indexOf === -1) {
-    res.send({status: 0, message: "User not found"});
-}
-
-//get user by ID
-res.send({status: 1, user: users[indexOf]});
+res.send({status: 1, user: req.authenticatedUser});
 });
 
 router.patch("/:id", (req, res) => {
@@ -73,7 +58,6 @@ const {users} = req;
  }
  
  const indexOf = findUserIndexOfById(users, id);
- console.log(indexOf)
  
  if (indexOf === -1) {
      res.send({status: 0, message: "User not found"});

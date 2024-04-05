@@ -5,9 +5,13 @@ function findUserByCreds(users, username, password, email) {
 };
 
 function findUserIndexOfById(users, id) {
-    users.findIndex((user) => {
+   return users.findIndex((user) => {
         return user.id === id 
     });
 }
 
-module.exports = {findUserByCreds, findUserIndexOfById};
+function getRandomString() {
+    return Math.floor(Math.random() * 9999999999999999)
+}
+
+module.exports = {findUserByCreds, findUserIndexOfById, getRandomString};
