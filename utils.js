@@ -10,8 +10,14 @@ function findUserIndexOfById(users, id) {
     });
 }
 
-function getRandomString() {
-    return Math.floor(Math.random() * 9999999999999999)
+function getRandomString(len=32) {
+    let uniqueId = "";
+    let charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+     
+    for (let i = 0; i < len; i++) {
+    uniqueId += charset.charAt(Math.floor(Math.random() * charset.length));
+    };
+    return (uniqueId+=Date.now());
 }
 
 module.exports = {findUserByCreds, findUserIndexOfById, getRandomString};

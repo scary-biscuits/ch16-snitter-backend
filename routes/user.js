@@ -39,40 +39,24 @@ router.get("/:id", checkToken, (req, res) => {
 res.send({status: 1, user: req.authenticatedUser});
 });
 
-router.patch("/:id", (req, res) => {
+router.patch("/:id", checkToken, (req, res) => {
 const {email, password, name} = req.body;
-let {id} = req.params;
-const {users} = req;
 
 //defensive checks
-
  if (!(email || password || name)) {
     res.send({status: 0, message: "No data sent"});
  }
 
- id = Number(id);
-
- if (!id || Number.isNaN(id)) {
-     res.send({status: 0, message: "Missing or invalid ID sent"})
- return;
- }
- 
- const indexOf = findUserIndexOfById(users, id);
- 
- if (indexOf === -1) {
-     res.send({status: 0, message: "User not found"});
- }
-
  //update
 if (email) {
-    users[indexOf].email = email;
+   req.authenticatedUser.email = email;
 }
 if (password) {
-    users[indexOf].password = sha256(password + salt);
+    req.authenticatedUser.password = sha256(password + salt);
 };
 
 if(name) {
-    users[indexOf].name = name;
+    req.authenticatedUser.name = name;
 }
 
  res.send({status: 1, message: "User updated"})
@@ -101,25 +85,15 @@ res.send({status: 1, message: "New data added"})
 
 
 //delete a user
-router.delete("/:id", (req, res) => {
-    let {id} = req.params;
-    const {users} = req;
+router.delete("/:id", checkToken, (req, res) => {
+   
+delete req.authenticatedUser.id;
+delete req.authenticatedUser.name;
+delete req.authenticatedUser.username;
+delete req.authenticatedUser.email;
+delete req.authenticatedUser.password;
+delete req.authenticatedUser.token;
 
-    id= Number(id);
-
-if (!id || Number.isNaN(id)) {
-    res.send({status: 0, message: "Missing or invalid ID sent"})
-return;
-}
-
-const indexOf = findUserIndexOfById(users,id);
-
-if (indexOf === -1) {
-    res.send({status: 0, message: "User not found"})
-}
-
-//delete found user
-users.splice(indexOf, 1)
 res.send({status: 1, message: "User deleted"})
 
 })

@@ -1,6 +1,7 @@
 function checkToken(req, res, next) {
     const user = req.users.find(user => {
-        return user.token === Number(req.headers.token);
+        return user.token.includes(req.headers.token);
+
     });
     if(user) {
         req.authenticatedUser = user;

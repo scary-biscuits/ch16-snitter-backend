@@ -6,7 +6,6 @@ const {getRandomString} = require("../utils");
 const { checkToken } = require("../middleware");
 
 router.post("/", (req, res) => {
-    console.log(req.body)
     const user = req.users.find(user => {
         return user.username === req.body.username && user.password === sha256(req.body.password + salt)
     });
@@ -16,14 +15,14 @@ if (!user) {
 }
 
 const token = getRandomString();
-user.token = token;
+user.token ? user.token.push(token) : user.token=[token]
 res.send({status: 1, message: "User logged in", token: token}); 
 
 });
 
 //logout user
 router.delete("/", checkToken, (req,res) => {
-    req.authenticatedUser.token = undefined;
+    req.authenticatedUser.token.splice(req.authenticatedUser.token.indexOf(req.headers.token), 1) ;
     res.send({status: 1, message: "User logged out"})
 })
 
