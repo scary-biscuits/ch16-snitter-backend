@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 const sha256 = require("sha256");
 const {salt} = require("../secrets");
-const {findUserByCreds, findUserIndexOfById} = require("../utils");
+const {findUserByCreds, findUserIndexOfById, getRandomString} = require("../utils");
 const { checkToken } = require("../middleware");
+const asyncMySQL = require("../mysql/driver")
 
 //add a new user
 router.post("/", (req, res) => {
-    let {users, body, lastAssignedId } = req;
-    let {name, username, email, password} = body;
+
+    let {name, username, email, password} = req.body;
  
     if(!username || !password || !email) {
         res.send({status: 0, message: "Insufficient data sent in request"});
@@ -17,15 +18,40 @@ router.post("/", (req, res) => {
 
     password = sha256(password + salt);
 
-    const user = findUserByCreds(users, username, password, email);
+   const token = getRandomString();
 
-    if (user) {
-        res.send({status: 0, message: "An account with these credentials already exists"})
-        return;
-    }
-    lastAssignedId.value++;
-    users.push({id: lastAssignedId.value, name, username, email, password });
-    res.send({status: 1, id: lastAssignedId.value})
+   try{
+  const result =  asyncMySQL(`INSERT INTO users
+                (email, password)
+                VALUES
+                ("${email}", "${password}")`)
+
+
+    res.send({status: 1, token})
+
+   } catch(e) {
+    res.send({status: 0, message: "Error"})
+   }
+
+    // let {users, body, lastAssignedId } = req;
+    // let {name, username, email, password} = body;
+ 
+    // if(!username || !password || !email) {
+    //     res.send({status: 0, message: "Insufficient data sent in request"});
+    //     return;
+    // }
+
+    // password = sha256(password + salt);
+
+    // const user = findUserByCreds(users, username, password, email);
+
+    // if (user) {
+    //     res.send({status: 0, message: "An account with these credentials already exists"})
+    //     return;
+    // }
+    // lastAssignedId.value++;
+    // users.push({id: lastAssignedId.value, name, username, email, password });
+    // res.send({status: 1, id: lastAssignedId.value})
 })
 
 //TESTING ONLY - get all users
