@@ -1,11 +1,12 @@
 
 const mongoose = require("mongoose");
-
 const Schema = mongoose.Schema;
+
+let connection;
 
 const connect = async () => {
     try { 
-const connection = await mongoose.connect(`mongodb://127.0.0.1:27017/test`);
+ connection = await mongoose.connect(`mongodb://127.0.0.1:27017/test`);
 mongoose.connection.collection("error", (err) => {
     console.log(err);
 });
@@ -29,8 +30,8 @@ const Person = mongoose.model("Person", personschema);
 // russell.save();
 
 //read
-const person = await Person.find({name: "Russell"});
-console.log(person);
+// const person = await Person.find({name: "Russell"});
+// console.log(person);
 
 //update
 // const result = Person.findOneAndUpdate({name: "Russell"}, {location: "Spain"})
@@ -49,3 +50,4 @@ console.log(person);
 }
 
 connect();
+module.exports = connection;
